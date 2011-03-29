@@ -77,16 +77,23 @@ readonly AAR_FGNAMES_ALL AAR_BGNAMES_ALL AAR_MODNAMES_ALL
 }
 
 list() { # List colors and modes
-local x
+local -i i
+local x n_short
 local STR_FGNAMES=$(printf "%s\n" "${!FG_COLORS[@]}" | sort)
 local STR_MODENAMES=$(printf "%s\n" "${!ANSI_MODES[@]}" | sort)
-pr_sep; printf "%-11s- Foreground / Background\n" "Name"; pr_sep
+pr_sep; printf "Colors: Long-form | Shortest-form - Fore- / Background\n"; pr_sep
 for x in $STR_FGNAMES; do
-	printf " %-10s- %s / %s\n" $x ${FG_COLORS[$x]} ${BG_COLORS[$x]}
+	for i in ${!ARR_COLNAMES_MAP[@]}; do
+		[[ ${ARR_COLNAMES_MAP[i]%[[:blank:]]*} = $x ]] && n_short=${ARR_COLNAMES_MAP[i]#*[[:blank:]]} && break
+	done
+	printf " %-9s | %-6s - %s / %s\n" $x $n_short ${FG_COLORS[$x]} ${BG_COLORS[$x]}
 done
-pr_sep; printf "Modes:\n"; pr_sep
+pr_sep; printf "Modes: Long-form | Shortest-form - Code\n"; pr_sep
 for x in $STR_MODENAMES; do
-	printf " %-10s- %s\n" $x ${ANSI_MODES[$x]}
+	for i in ${!ARR_MODNAMES_MAP[@]}; do
+		[[ ${ARR_MODNAMES_MAP[i]%[[:blank:]]*} = $x ]] && n_short=${ARR_MODNAMES_MAP[i]#*[[:blank:]]} && break
+	done
+	printf " %-9s | %-6s - %s\n" $x $n_short ${ANSI_MODES[$x]}
 done
 }
 
