@@ -10,7 +10,6 @@ fi
 # --------------------------------------------------------------
 
 LANG=C
-SEPSTR="---------------------------------------------------------"
 
 declare -Ar FG_COLORS=([black]=30 [red]=31 [green]=32 [yellow]=33 [blue]=34 [magenta]=35 [cyan]=36 [white]=37)
 declare -Ar BG_COLORS=([black]=40 [red]=41 [green]=42 [yellow]=43 [blue]=44 [magenta]=45 [cyan]=46 [white]=47)
@@ -45,14 +44,13 @@ declare -A AAR_MODNAMES_ALL
 # --------------------------------------------------------------
 
 pr_sep() {
-printf "%s\n" "$SEPSTR"
+printf "%s\n" "---------------------------------------------------------"
 }
 
 get_variants() { # create unique variations of code names
-local str_l=$1
 local -i i_lengl=${#1} i_lengs=${#2}
 while ((i_lengl >= i_lengs)); do
-	printf "%s\n" ${str_l:0:i_lengl--}
+	printf "%s\n" ${1:0:i_lengl--}
 done
 }
 
@@ -77,23 +75,23 @@ readonly AAR_FGNAMES_ALL AAR_BGNAMES_ALL AAR_MODNAMES_ALL
 }
 
 list() { # List colors and modes
+local x
 local -i i
-local x n_short
 local STR_FGNAMES=$(printf "%s\n" "${!FG_COLORS[@]}" | sort)
 local STR_MODENAMES=$(printf "%s\n" "${!ANSI_MODES[@]}" | sort)
 pr_sep; printf "Colors: Long-form | Shortest-form - Fore- / Background\n"; pr_sep
 for x in $STR_FGNAMES; do
 	for i in ${!ARR_COLNAMES_MAP[@]}; do
-		[[ ${ARR_COLNAMES_MAP[i]%[[:blank:]]*} = $x ]] && n_short=${ARR_COLNAMES_MAP[i]#*[[:blank:]]} && break
+		set -- ${ARR_COLNAMES_MAP[i]}
+		[[ $1 = $x ]] && printf " %-9s | %-6s - %s / %s\n" $x $2 ${FG_COLORS[$x]} ${BG_COLORS[$x]} && break
 	done
-	printf " %-9s | %-6s - %s / %s\n" $x $n_short ${FG_COLORS[$x]} ${BG_COLORS[$x]}
 done
 pr_sep; printf "Modes: Long-form | Shortest-form - Code\n"; pr_sep
 for x in $STR_MODENAMES; do
 	for i in ${!ARR_MODNAMES_MAP[@]}; do
-		[[ ${ARR_MODNAMES_MAP[i]%[[:blank:]]*} = $x ]] && n_short=${ARR_MODNAMES_MAP[i]#*[[:blank:]]} && break
+		set -- ${ARR_MODNAMES_MAP[i]}
+		[[ $1 = $x ]] && printf " %-9s | %-6s - %s\n" $x $2 ${ANSI_MODES[$x]} && break
 	done
-	printf " %-9s | %-6s - %s\n" $x $n_short ${ANSI_MODES[$x]}
 done
 }
 
