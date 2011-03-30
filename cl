@@ -123,6 +123,10 @@ iscolor() { # check if name is a known color
 [[ ${AAR_FGNAMES_ALL[$1]} ]]
 }
 
+add_code() {
+arr_ansi_seq+="$1;"
+}
+
 cl() { # assemble the ansi code sequence
 local -i i_bg=i_fg=0
 declare -a arr_ansi_seq=()
@@ -132,14 +136,14 @@ while (( $# )); do
 		arr_ansi_seq=(0)
 		break
 	elif ismode "$1"; then
-		arr_ansi_seq+="${AAR_MODNAMES_ALL[$1]};"
+		add_code "${AAR_MODNAMES_ALL[$1]}"
 	elif iscolor "$1"; then
 		if ! ((i_fg)); then
 			i_fg=1
-			arr_ansi_seq+="${AAR_FGNAMES_ALL[$1]};"
+			add_code "${AAR_FGNAMES_ALL[$1]}"
 		elif ! ((i_bg)); then
 			i_bg=1
-			arr_ansi_seq+="${AAR_BGNAMES_ALL[$1]};"
+			add_code "${AAR_BGNAMES_ALL[$1]}"
 		else
 			printf "Only 2 colors are allowed\n" >&2
 			return 1
