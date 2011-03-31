@@ -7,9 +7,9 @@
 LANG=C
 
 if ((${BASH_VERSINFO[0]} >= 4)); then
-	declare -Ar FG_COLORS=([black]=30 [red]=31 [green]=32 [yellow]=33 [blue]=34 [magenta]=35 [cyan]=36 [white]=37)
-	declare -Ar BG_COLORS=([black]=40 [red]=41 [green]=42 [yellow]=43 [blue]=44 [magenta]=45 [cyan]=46 [white]=47)
-	declare -Ar ANSI_MODES=([normal]=0 [bold]=1 [faint]=2 [italic]=3 [underline]=4 [blink]=5 [fastblink]=6 [inverse]=7 [invisible]=8)
+	declare -Ar AAR_FG_COLORS=([black]=30 [red]=31 [green]=32 [yellow]=33 [blue]=34 [magenta]=35 [cyan]=36 [white]=37)
+	declare -Ar AAR_BG_COLORS=([black]=40 [red]=41 [green]=42 [yellow]=43 [blue]=44 [magenta]=45 [cyan]=46 [white]=47)
+	declare -Ar AAR_ANSI_MODES=([normal]=0 [bold]=1 [faint]=2 [italic]=3 [underline]=4 [blink]=5 [fastblink]=6 [inverse]=7 [invisible]=8)
 	declare -A AAR_FGNAMES_ALL
 	declare -A AAR_BGNAMES_ALL
 	declare -A AAR_MODNAMES_ALL
@@ -116,15 +116,15 @@ if ((${BASH_VERSINFO[0]} >= 4)); then
 			set -- ${ARR_COLNAMES_MAP[$name]}
 			n_long=$1 n_short=$2
 			for variant in $(cl_get_variants $n_long $n_short); do
-				AAR_FGNAMES_ALL[$variant]=${FG_COLORS[$n_long]}
-				AAR_BGNAMES_ALL[$variant]=${BG_COLORS[$n_long]}
+				AAR_FGNAMES_ALL[$variant]=${AAR_FG_COLORS[$n_long]}
+				AAR_BGNAMES_ALL[$variant]=${AAR_BG_COLORS[$n_long]}
 			done
 		done
 		for name in ${!ARR_MODNAMES_MAP[@]}; do
 			set -- ${ARR_MODNAMES_MAP[$name]}
 			n_long=$1 n_short=$2
 			for variant in $(cl_get_variants $n_long $n_short); do
-				AAR_MODNAMES_ALL[$variant]=${ANSI_MODES[$n_long]}
+				AAR_MODNAMES_ALL[$variant]=${AAR_ANSI_MODES[$n_long]}
 			done
 		done
 		readonly AAR_FGNAMES_ALL AAR_BGNAMES_ALL AAR_MODNAMES_ALL
@@ -156,8 +156,8 @@ cl_list() { # List colors and modes
 local x
 local -i i
 if ((${BASH_VERSINFO[0]} >= 4)); then
-	local STR_FGNAMES=$(printf "%s\n" "${!FG_COLORS[@]}" | sort)
-	local STR_MODENAMES=$(printf "%s\n" "${!ANSI_MODES[@]}" | sort)
+	local STR_FGNAMES=$(printf "%s\n" "${!AAR_FG_COLORS[@]}" | sort)
+	local STR_MODENAMES=$(printf "%s\n" "${!AAR_ANSI_MODES[@]}" | sort)
 else
 	local STR_FGNAMES=$(printf "%s\n" "${ARR_FG_COLORS[@]}" | sort)
 	local STR_MODENAMES=$(printf "%s\n" "${ARR_ANSI_MODES[@]}" | sort)
@@ -168,7 +168,7 @@ for x in $STR_FGNAMES; do
 		set -- ${ARR_COLNAMES_MAP[i]}
 		if [[ $1 = $x ]]; then
 			if ((${BASH_VERSINFO[0]} >= 4)); then
-			   printf " %-9s | %-6s - %s / %s\n" $x $2 ${FG_COLORS[$x]} ${BG_COLORS[$x]}
+			   printf " %-9s | %-6s - %s / %s\n" $x $2 ${AAR_FG_COLORS[$x]} ${AAR_BG_COLORS[$x]}
 			else
 				printf " %-9s | %-6s - %s / %s\n" $x $2 $(cl_get_fg_code $x) $(cl_get_bg_code $x)
 			fi
@@ -182,7 +182,7 @@ for x in $STR_MODENAMES; do
 		set -- ${ARR_MODNAMES_MAP[i]}
 		if [[ $1 = $x ]]; then
 			if ((${BASH_VERSINFO[0]} >= 4)); then
-				printf " %-9s | %-6s - %s\n" $x $2 ${ANSI_MODES[$x]} && break
+				printf " %-9s | %-6s - %s\n" $x $2 ${AAR_ANSI_MODES[$x]} && break
 			else
 				printf " %-9s | %-6s - %s\n" $x $2 $(cl_get_ansi_code $x) && break
 			fi
@@ -195,9 +195,9 @@ cl_show() { # Print the color table
 local x
 local -i i_mode i_fg i_bg
 if ((${BASH_VERSINFO[0]} >= 4)); then
-	eval declare -ar ARR_ANSI_MODES=( $(for x in ${!ANSI_MODES[@]}; do printf "[%s]=%s\n" ${ANSI_MODES[$x]} $x; done) )
-	eval declare -ar ARR_FG_COLORS=( $(for x in ${!FG_COLORS[@]}; do printf "[%s]=%s\n" ${FG_COLORS[$x]} $x; done) )
-	eval declare -ar ARR_BG_COLORS=( $(for x in ${!BG_COLORS[@]}; do printf "[%s]=%s\n" ${BG_COLORS[$x]} $x; done) )
+	eval declare -ar ARR_ANSI_MODES=( $(for x in ${!AAR_ANSI_MODES[@]}; do printf "[%s]=%s\n" ${AAR_ANSI_MODES[$x]} $x; done) )
+	eval declare -ar ARR_FG_COLORS=( $(for x in ${!AAR_FG_COLORS[@]}; do printf "[%s]=%s\n" ${AAR_FG_COLORS[$x]} $x; done) )
+	eval declare -ar ARR_BG_COLORS=( $(for x in ${!BG_COLORS[@]}; do printf "[%s]=%s\n" ${AAR_BG_COLORS[$x]} $x; done) )
 fi
 for i_mode in ${!ARR_ANSI_MODES[@]}; do
 	pr_sep
