@@ -5,6 +5,9 @@
 # --------------------------------------------------------------
 
 LANG=C
+: ${CL_DIR_DATA:=~}
+: ${CL_FILE_VARIANTS:=.cl_variants}
+CL_FILE_VARIANTS="${CL_FILE_VARIANTS}_bash${BASH_VERSINFO[0]}"
 
 if ((${BASH_VERSINFO[0]} >= 4)); then
 	declare -Ar AAR_FG_COLORS=([black]=30 [red]=31 [green]=32 [yellow]=33 [blue]=34 [magenta]=35 [cyan]=36 [white]=37)
@@ -51,6 +54,7 @@ pr_sep() {
 printf "%s\n" "---------------------------------------------------------"
 }
 
+# retrieve codes from names (bash prior to v4)
 if ((${BASH_VERSINFO[0]} < 4)); then
 	cl_get_fg_code() {
 		local -i i
@@ -72,6 +76,7 @@ if ((${BASH_VERSINFO[0]} < 4)); then
 	}
 fi
 
+# retrieve codes from names (bash prior to v4) - incl. variants
 if ((${BASH_VERSINFO[0]} < 4)); then
 	cl_get_fg_code_all() {
 		local -i i
@@ -109,8 +114,9 @@ cl_get_variants() { # create unique variations of code names
 	done
 }
 
+# set variations of code names
 if ((${BASH_VERSINFO[0]} >= 4)); then
-	cl_set_variants() { # set variations of code names
+	cl_set_variants() {
 		local name n_long n_short variant
 		for name in ${!ARR_COLNAMES_MAP[@]}; do
 			set -- ${ARR_COLNAMES_MAP[$name]}
@@ -130,7 +136,7 @@ if ((${BASH_VERSINFO[0]} >= 4)); then
 		readonly AAR_FGNAMES_ALL AAR_BGNAMES_ALL AAR_MODNAMES_ALL
 	}
 else
-	cl_set_variants() { # set variations of code names
+	cl_set_variants() {
 		local name n_long n_short variant
 		local -i fg_code bg_code
 		for name in ${!ARR_COLNAMES_MAP[@]}; do
@@ -149,6 +155,23 @@ else
 			done
 		done
 		readonly ARR_FGNAMES_ALL ARR_BGNAMES_ALL ARR_MODNAMES_ALL
+	}
+fi
+
+# print (for saving) the code name variation arrays
+if ((${BASH_VERSINFO[0]} >= 4)); then
+	cl_save_variants() {
+		local x
+		for x in AAR_FGNAMES_ALL AAR_BGNAMES_ALL AAR_MODNAMES_ALL; do
+			declare -p $x
+		done
+	}
+else
+	cl_save_variants() {
+		local x
+		for x in ARR_FGNAMES_ALL ARR_BGNAMES_ALL ARR_MODNAMES_ALL; do
+			declare -p $x
+		done
 	}
 fi
 
@@ -249,23 +272,26 @@ else
 	}
 fi
 
-_cl_add_code() {
+_cl_add_code() { # add a code sequence to the ansi_code string
 	str_ansi_seq+="$1;"
 }
 
 cl() { # assemble the ansi code sequence
 local -i i_bg=i_fg=0
 local str_ansi_seq=""
-if [[ $1 ]]; then
-   cl_set_variants
+if [[ $1 && $1 != off ]]; then
+	if [[ -r $CL_DIR_DATA/$CL_FILE_VARIANTS ]]; then
+		. "$CL_DIR_DATA/$CL_FILE_VARIANTS" || return 1
+	else
+	   cl_set_variants
+	   cl_save_variants > "$CL_DIR_DATA/$CL_FILE_VARIANTS" || return 1
+   fi
 else
-	set -- "off"
+	str_ansi_seq=(0)
+	shift $#
 fi
 while (( $# )); do
-	if [[ $1 = off ]]; then
-		str_ansi_seq=(0)
-		break
-	elif cl_ismode "$1"; then
+	if cl_ismode "$1"; then
 		if ((${BASH_VERSINFO[0]} >= 4)); then
 			_cl_add_code "${AAR_MODNAMES_ALL[$1]}"
 		else
@@ -307,7 +333,7 @@ case "$1" in
 	--help)
 		printf "${0##*/} - Colorize shell [script] output\n\n"
 		printf "${0##*/} [mode [...]] [fg-color] [bg-color]\n"
-		printf "${0##*/} --help | --list | --show\n\n"
+		printf "${0##*/} --help | --list | --show | --variants\n\n"
 		exit
 	;;
 	--list)
@@ -316,6 +342,12 @@ case "$1" in
 	;;
 	--show)
    		cl_show
+		exit
+	;;
+	--variants)
+		printf "(Re)creating variants file: %s\n" "$CL_DIR_DATA/$CL_FILE_VARIANTS"
+		cl_set_variants
+		cl_save_variants > "$CL_DIR_DATA/$CL_FILE_VARIANTS" || return 1
 		exit
 	;;
 esac
