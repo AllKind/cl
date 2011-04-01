@@ -347,7 +347,7 @@ case "$1" in
 	--variants)
 		printf "(Re)creating variants file: %s\n" "$CL_DIR_DATA/$CL_FILE_VARIANTS"
 		cl_set_variants
-		cl_save_variants > "$CL_DIR_DATA/$CL_FILE_VARIANTS" || return 1
+		cl_save_variants > "$CL_DIR_DATA/$CL_FILE_VARIANTS" || exit 1
 		exit
 	;;
 esac
