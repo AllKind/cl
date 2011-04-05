@@ -22,21 +22,18 @@ LANG=C
 : ${CL_DIR_DATA:=~}
 : ${CL_FILE_VARIANTS:=.cl_variants}
 CL_FILE_VARIANTS="${CL_FILE_VARIANTS}_bash${BASH_VERSINFO[0]}"
+declare P_FORMAT
 
 if ((BASH_VERSINFO[0] >= 4)); then
 	declare -Ar AAR_FG_COLORS=([black]=30 [red]=31 [green]=32 [yellow]=33 [blue]=34 [magenta]=35 [cyan]=36 [white]=37)
 	declare -Ar AAR_BG_COLORS=([black]=40 [red]=41 [green]=42 [yellow]=43 [blue]=44 [magenta]=45 [cyan]=46 [white]=47)
 	declare -Ar AAR_ANSI_MODES=([normal]=0 [bold]=1 [faint]=2 [italic]=3 [underline]=4 [blink]=5 [fastblink]=6 [inverse]=7 [invisible]=8)
-	declare -A AAR_FGNAMES_ALL
-	declare -A AAR_BGNAMES_ALL
-	declare -A AAR_MODNAMES_ALL
+	declare -A AAR_FGNAMES_ALL AAR_BGNAMES_ALL AAR_MODNAMES_ALL
 else
 	declare -ar ARR_ANSI_MODES=(normal bold faint italic underline blink fastblink inverse invisible)
 	declare -ar ARR_FG_COLORS=([30]=black [31]=red [32]=green [33]=yellow [34]=blue [35]=magenta [36]=cyan [37]=white)
 	declare -ar ARR_BG_COLORS=([40]=black [41]=red [42]=green [43]=yellow [44]=blue [45]=magenta [46]=cyan [47]=white)
-	declare -a ARR_FGNAMES_ALL
-	declare -a ARR_BGNAMES_ALL
-	declare -a ARR_MODNAMES_ALL
+	declare -a ARR_FGNAMES_ALL ARR_BGNAMES_ALL ARR_MODNAMES_ALL
 fi
 declare -ar ARR_COLNAMES_MAP=(
 "black bla"
@@ -303,7 +300,7 @@ while (( $# )); do
 	fi
 	shift
 done
-printf "\e[${str_ansi_seq%;}m"
+printf $P_FORMAT "\e[${str_ansi_seq%;}m"
 }
 
 # --------------------------------------------------------------
@@ -313,7 +310,7 @@ printf "\e[${str_ansi_seq%;}m"
 case "$1" in
 	--help)
 		printf "${0##*/} - Colorize shell [script] output\n\n"
-		printf "${0##*/} [mode [...]] [fg-color] [bg-color]\n"
+		printf "${0##*/} [--print] [mode [...]] [fg-color] [bg-color]\n"
 		printf "${0##*/} --help | --list | --show | --variants\n\n"
 	;;
 	--list)
@@ -331,6 +328,12 @@ case "$1" in
 		cl $1
 	;;
 	*)
+		if [[ $1 = --print ]]; then
+			P_FORMAT="%q\n"
+			shift
+		else
+			P_FORMAT=""
+		fi
 		if [[ -r $CL_DIR_DATA/$CL_FILE_VARIANTS ]]; then
 			. "$CL_DIR_DATA/$CL_FILE_VARIANTS" || exit $?
 		else
