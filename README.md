@@ -1,0 +1,4 @@
+cl
+==
+
+colorize shell output
