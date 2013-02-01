@@ -23,7 +23,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # -----------------------------------------------------------------
-
+#
+# Version 1.1
+#
 # -----------------------------------------------------------------
 # Examples:
 #
@@ -345,7 +347,7 @@ case "$1" in
 	--help)
 		printf "${0##*/} - Colorize shell [script] output\n\n"
 		printf "${0##*/} [--print] [mode [...]] [fg-color] [bg-color]\n"
-		printf "${0##*/} --help | --list | --show | --variants\n\n"
+		printf "${0##*/} --help | --list | --show | --variants | --version\n\n"
 	;;
 	--list)
    		cl_list
@@ -357,6 +359,9 @@ case "$1" in
 		printf "(Re)creating variants file: %s\n" "$CL_DIR_DATA/$CL_FILE_VARIANTS"
 		cl_set_variants
 		cl_save_variants > "$CL_DIR_DATA/$CL_FILE_VARIANTS"
+	;;
+	--version)
+		printf "cl v1.1\n"
 	;;
 	""|off)
 		cl $1
