@@ -28,6 +28,7 @@
 # Examples:
 #
 # cl bold yellow    - set current shell foreground colour to bold yellow
+# cl off            - turn off colors (off can be omitted)
 # cl --print red    - show generated code for forground color red
 # printf "foo %b bar\n" "$(cl red yellow)fox$(cl)"    - display fox
 # + in red on yellow background
@@ -35,15 +36,15 @@
 
 # bash version check
 if [ -z "$BASH" ]; then
-	printf "\`BASH' variable is not available. Not running bash?\n"
+	printf "\`BASH' variable is not available. Not running bash?\n" >&2
 	exit 3
 fi
 if [ ${BASH_VERSINFO[0]} -lt 3 ]; then
-	printf "${0##*/} requires bash version 3.1 or higher.\n"
+	printf "${0##*/} requires bash version 3.1 or higher.\n" >&2
 	exit 3
 fi
 if ((BASH_VERSINFO[0] == 3 && BASH_VERSINFO[1] == 0)); then
-	printf "${0##*/} requires bash version 3.1 or higher.\n"
+	printf "${0##*/} requires bash version 3.1 or higher.\n" >&2
 	exit 3
 fi
 
@@ -298,7 +299,7 @@ cl() { # assemble the ansi code sequence
 local -i i_bg=i_fg=0
 local str_ansi_seq=""
 if [[ -z $1 || $1 = off ]]; then
-	str_ansi_seq=(0)
+	str_ansi_seq=0
 	shift $#
 fi
 while (( $# )); do
